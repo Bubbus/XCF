@@ -7,6 +7,7 @@ local folder_ID_File = "xcf.txt" -- A file unique to the addon folder, useful fo
 local doGitFileCheck = true -- Should we check the integrity of the git FETCH_HEAD? (requires a unique branch name!)
 local git_ID_branch = "XCF_VCHECK" -- Find this branch in the FETCH_HEAD file - if it isn't there, we're in the wrong folder!
 
+local addon_printname = "XCF" -- What name do players know your addon by?
 local complainAboutSuccess = true -- Print happy text if we're all updated?
 
 
@@ -37,7 +38,7 @@ timer.Simple( 1, function()
 	http.Fetch( fetch_url, function( fetch_str )
 	
 		if not localhash then
-			printStatus( Color(225, 0, 0), "XCF is not installed (or incorrectly installed)!" )
+			printStatus( Color(225, 0, 0), addon_printname .. " is not installed (or incorrectly installed)!" )
 			return
 		end
 	
@@ -45,15 +46,15 @@ timer.Simple( 1, function()
 		local webhash = string.match( fetch_str, fetch_reg )
 		
 		if not webhash then
-			printStatus( Color(225, 0, 0), "XCF Version check failed!  Couldn't retrieve the online version!")
+			printStatus( Color(225, 0, 0), addon_printname .. " Version check failed!  Couldn't retrieve the online version!")
 			return
 		end
 		
 		
 		if localhash ~= webhash then
-			printStatus( Color(225, 0, 0), "XCF is out of date!" )
+			printStatus( Color(225, 0, 0), addon_printname .. " is out of date!" )
 		else
-			if complainAboutSuccess then printStatus( Color(0, 225, 0), "You're running the latest version of XCF!" ) end
+			if complainAboutSuccess then printStatus( Color(0, 225, 0), "You're running the latest version of " .. addon_printname .. "!" ) end
 		end
 		
 	end)
@@ -63,7 +64,7 @@ end)
 
 
 
-local function XCF_FindAddonFolder()
+local function VCheck_FindAddonFolder()
 	local addonfiles, addonfolders = file.Find("addons/*", "GAME")
 	local addonfolder
 	--print(addonfiles and (#addonfiles .. " addon files!") or "No addon files!", addonfolders and (#addonfolders .. " addon folders!") or "No addon folders!")
@@ -95,9 +96,9 @@ end
 
 
 
-local function XCF_GetLocalVersion_Git()
+local function VCheck_GetLocalVersion_Git()
 	
-	local addonfolder = XCF_FindAddonFolder()
+	local addonfolder = VCheck_FindAddonFolder()
 	if not addonfolder then return end
 	
 	local versionfilename = addonfolder .. "/.git/FETCH_HEAD"
@@ -153,7 +154,7 @@ end
 
 
 
-localhash = XCF_GetLocalVersion_Git()
+localhash = VCheck_GetLocalVersion_Git()
 
 
 
