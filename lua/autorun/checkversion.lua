@@ -1,4 +1,4 @@
--- Git version checker, by Bubbus based on work by Shadowsicon!
+-- Git version checker, by Bubbus based on work by Shadowscion!
 
 local fetch_url = "https://api.github.com/repos/Bubbus/XCF/commits?per_page=1" -- Your repo goes here!
 local fetch_reg = "\"sha\":\"(%w+)\"," -- Pattern for finding the internet version
