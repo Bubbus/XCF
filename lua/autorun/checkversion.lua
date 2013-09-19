@@ -131,7 +131,7 @@ local function VCheck_GetLocalVersion_Git()
 	
 		for k, line in pairs(lines) do
 		
-			if not masterline and string.find(line, "master") then
+			if string.find(line, "master") then
 				masterline = line
 				break
 			end
