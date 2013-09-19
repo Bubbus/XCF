@@ -131,19 +131,16 @@ local function VCheck_GetLocalVersion_Git()
 	
 		for k, line in pairs(lines) do
 		
-			if string.find(line, git_ID_branch) then
-				isCorrectGit = true
-			elseif not masterline and string.find(line, "master") then
+			if not masterline and string.find(line, "master") then
 				masterline = line
+				break
 			end
-			
-			if isCorrectGit and masterline then break end
-			
+
 		end
 	
 	end
 
-	
+	if not masterline then return end
 	
 	localhash = string.Left( masterline, 40 )
 	--print("Got local master hash!", localhash)
