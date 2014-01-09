@@ -1,10 +1,12 @@
-DEFINE_BASECLASS("base_gmodentity")
-ENT.PrintName 		= "XCF Rocket"
+DEFINE_BASECLASS( "base_wire_entity" )
+
+ENT.PrintName 		= "XCF Missile"
 ENT.Author 			= "Bubbus"
 ENT.Contact 		= "splambob@googlemail.com"
-ENT.Purpose		 	= "Because bullets aren't cool enough."
-ENT.Instructions 	= "Point towards face for removal of face.  Point away from face for instant fake tan (then removal of face)."
+ENT.Purpose		 	= "For if you like to missile things"
+ENT.Instructions 	= "light fuse, point away from face"
 ENT.Category 		= "XCF"
+ENT.WireDebugName = "XCF Missile"
 
 ENT.Spawnable 		= false
 ENT.AdminOnly		= false
