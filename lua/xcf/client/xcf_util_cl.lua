@@ -46,6 +46,7 @@ local function recvSWEPMuzzle(len)
 	local type = net.ReadInt(8)
 	
 	local lply = LocalPlayer()
+	if not (IsValid(lply) and IsValid(ent)) then return end
 	if ent.Owner and ent.Owner == lply or ent:GetOwner() == lply then return end
 	
 	local Effect = EffectData()

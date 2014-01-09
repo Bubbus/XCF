@@ -410,3 +410,10 @@ function SWEP:FireAnimationEvent(pos,ang,event)
 
 	return (event==5001)
 end
+
+
+
+
+function SWEP:Equip(ply)
+	self.Owner = ply
+end
