@@ -19,6 +19,8 @@ function ENT:Initialize()
 	self.Inputs = Wire_CreateInputs( self, { "Detonate" } )
 	self.Outputs = Wire_CreateOutputs( self, {} )
 	
+	--self.ACF_HEIgnore = true
+	
 end
 
 
@@ -30,7 +32,7 @@ function ENT:ACF_OnDamage( Entity , Energy , FrAera , Angle , Inflictor )
 	local CanDo = hook.Run("ACF_AmmoExplode", self, self.BulletData )
 	if CanDo == false then return HitRes end
 	
-	HitRes.Kill = true
+	HitRes.Kill = false
 	self:Detonate()
 	
 	return HitRes --This function needs to return HitRes
@@ -38,15 +40,29 @@ end
 
 
 
+
+function ENT:TriggerInput( inp, value )
+	if inp == "Detonate" and value ~= 0 then
+		self:Detonate()
+	end
+end
+
+
+
+
 function MakeXCF_Bomb(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Mdl)
+
+	--print(Owner, Pos, Angle, Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Mdl)
 
 	if not Owner:CheckLimit("_xcf_bomb") then return false end
 	
 	--print(Id, Data1, Data2)
 	local weapon = ACF.Weapons.Guns[Data1]
+	---[[
 	if not (weapon and weapon.roundclass and weapon.roundclass == "Bomb") then
 		return false, "Can't make a bomb with non-bomb round-data!"
 	end
+	--]]--
 	
 	local Bomb = ents.Create("xcf_bomb")
 	if not Bomb:IsValid() then return false end
@@ -136,6 +152,7 @@ end
 
 function ENT:SetBulletData(bdata)
 	self.BulletData = table.Copy(bdata)
+	self.BulletData.Entity = self
 	local phys = self.Entity:GetPhysicsObject()  	
 	if (IsValid(phys)) then  		
 		phys:SetMass( bdata.ProjMass or bdata.RoundMass or bdata.Mass or 10 ) 
@@ -172,9 +189,10 @@ end
 
 function ENT:Detonate()
 	
+	if self.Detonated then return end
+	
 	--print("boom2!")
 	self.Detonated = true
-	self.Entity:Remove()
 	
 	--print(self.BulletData.Type, ACF.RoundTypes[self.BulletData.Type]["endflight"])
 	ACF.RoundTypes[self.BulletData.Type]["endflight"]( -1337, self.BulletData, self:GetPos(), self:GetUp() )
@@ -183,6 +201,8 @@ function ENT:Detonate()
 	local phys = self:GetPhysicsObject()
 	self.BulletData.SimFlight = phys and phys:GetVelocity() or Vector(0, 0, 0.01)
 	ACF.RoundTypes[self.BulletData.Type]["endeffect"]( nil, self.BulletData)
+	
+	self.Entity:Remove()
 	
 	--timer.Simple(15, function() if self and self.Entity and IsValid(self.Entity) then self.Entity:Remove() end end)
 	--self.Entity:Remove()
@@ -207,4 +227,24 @@ function ENT:SetShouldTrace(bool)
 	self.ShouldTrace = bool and true
 	--print(self.ShouldTrace)
 	self:NextThink(CurTime())
+end
+
+
+
+
+function ENT:EnableClientInfo(bool)
+	self.ClientInfo = bool
+	self:SetNetworkedBool("VisInfo", bool)
+	
+	if bool then
+		self:RefreshClientInfo()
+	end
+end
+
+
+
+function ENT:RefreshClientInfo()
+	self:SetNetworkedString("RoundId", self.RoundId)
+	self:SetNetworkedString("RoundType", self.RoundType)
+	self:SetNetworkedFloat("FillerVol", self.RoundData5)
 end

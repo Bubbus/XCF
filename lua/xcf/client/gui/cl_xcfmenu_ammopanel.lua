@@ -18,6 +18,7 @@ verbose["AP"]		= "Armour Piercing"
 verbose["APHE"]		= "Armour Piercing, High Explosive"
 verbose["HE"]		= "High Explosive"
 verbose["HEAT"]		= "High Explosive, Anti-Tank"
+verbose["FL"]		= "Flechette"
 verbose["HP"]		= "Hollow Point"
 verbose["SM"]		= "Smoke"
 verbose["Refill"]	= "Refill"
@@ -312,6 +313,19 @@ createSlidersForAmmo["HEAT"] = function(self, entrylist, spacer)
 	
 	entrylist:AddItem(label)
 	entrylist:AddItem(spacer)
+end
+
+
+createSlidersForAmmo["FL"] = function(self, entrylist, spacer)
+	-- lol!
+	local label = vgui.Create( "DLabel" )
+	label:SetText("XCFMenu support for Flechettes is coming!\nUse the normal ACF menu for now!")
+	label:SetFont("DermaDefaultBold")
+	label:SetColor(Color(200, 30, 0))
+	label:SizeToContents()
+	
+	entrylist:AddItem(label)
+	self:InvalidateLayout()
 end
 
 

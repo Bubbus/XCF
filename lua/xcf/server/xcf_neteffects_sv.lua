@@ -33,9 +33,9 @@ end
 
 
 local ammoAttribs
-local function generateAmmoUID(ammo)
-	if not IsValid(ammo) then error("Got invalid ammo in net create hook: " .. tostring(ammo)) return end
-	
+local function generateAmmoUID(ammo, bdata)
+	//if not IsValid(ammo) then print("Got invalid ammo in net create hook: " .. tostring(ammo)) end
+	/*
 	if not ammoAttribs then
 		local dupeEntTbl = duplicator.FindEntityClass("acf_ammo")
 		if not dupeEntTbl then error("Couldn't find duplicator records for acf_ammo!") return end
@@ -57,12 +57,27 @@ local function generateAmmoUID(ammo)
 	for k, v in pairsByName(colour) do
 		attribs[#attribs + 1] = v
 	end
+	//*/
+	
+	ammo = IsValid(ammo) and ammo or {}
+	bdata = bdata or ammo.BulletData
+	
+	if not bdata then error("Didn't get valid bullet data in UID generation function.") return end
+	
+	local attribs = {}
+	
+	for k, v in pairsByName(bdata) do
+		attribs[#attribs+1] = tostring(k)
+		attribs[#attribs+1] = tostring(v)
+	end
 	
 	local ammoUID = util.CRC(table.concat(attribs))
-	ammo.NetUID = ammoUID
-	if ammo.BulletData then
-		ammo.BulletData.NetUID = ammoUID
+	
+	if IsValid(ammo) then
+		ammo.NetUID = ammoUID
 	end
+	
+	bdata.NetUID = ammoUID
 	
 	return ammoUID
 end
@@ -70,13 +85,12 @@ end
 
 
 
-local doNotReg = {Empty = true, Refill = true}
-local function ammoHook(ammo)
-	if XCF.Debug then printByNameTable(ammo.BulletData, "self.BulletData") end
-	if ammo.BulletData and doNotReg[ammo.BulletData.Type] then return end
-	
+local function bdataHook(bdata, ammo, parent)
+
 	local uidBefore = ammo.NetUID
-	local uid = generateAmmoUID(ammo)
+	local uid = parent and generateAmmoUID(nil, bdata) or generateAmmoUID(ammo, bdata)
+	
+	if parent then parent.ChildUID = uid end
 	
 	if uidBefore and uidBefore == uid then
 		--print("Identical UID", uid)
@@ -86,7 +100,25 @@ local function ammoHook(ammo)
 	
 	ammo:CallOnRemove( "xcfammo_remUID", this.OnAmmoRemoved)
 	
-	this.AmmoRegisterNet(uid, ammo.BulletData, ammo)
+	this.AmmoRegisterNet(uid, bdata, ammo)
+end
+
+
+
+//TODO: better design: move ammo reg into munition class -> ammo type files.
+local doNotReg = {Empty = true, Refill = true}
+local function ammoHook(ammo)
+	if XCF.Debug then printByNameTable(ammo.BulletData, "self.BulletData") end
+	
+	local bdata = ammo.BulletData
+	
+	if bdata and doNotReg[bdata.Type] then return end
+	
+	bdataHook(bdata, ammo)
+	
+	if bdata.Type == "FL" then
+		bdataHook(ACF.RoundTypes.FL.getFlechetteData(bdata), ammo, bdata)
+	end
 	
 end
 hook.Add("ACF_AmmoCreate", "XCF_NetAmmo", ammoHook)
@@ -104,8 +136,8 @@ hook.Add("ACF_GunCreate", "XCF_NetAmmo", gunCreateHook)
 
 
 local function gunHook(gun, oldammo, newammo)
-	local oldstr = oldammo.NetUID and oldammo.NetUID or (oldammo.Type and (oldammo.Type .. "/" .. tostring(oldammo.Id))) or "Old Ammo"
-	local newstr = newammo.NetUID and newammo.NetUID or (newammo.Type and (newammo.Type .. "/" .. tostring(newammo.Id))) or "New Ammo"
+	--local oldstr = oldammo.NetUID and oldammo.NetUID or (oldammo.Type and (oldammo.Type .. "/" .. tostring(oldammo.Id))) or "Old Ammo"
+	--local newstr = newammo.NetUID and newammo.NetUID or (newammo.Type and (newammo.Type .. "/" .. tostring(newammo.Id))) or "New Ammo"
 	--print("gunhook", oldstr, newstr)
 	
 	if oldammo.NetUID == newammo.NetUID then
@@ -346,8 +378,10 @@ end
 function this.SendProj(Index, Proj)
 
 	if Proj.NetUID then
+		--print("Sending UID Proj " .. Proj.Type)
 		this.SendUIDProj(Index, Proj)
 	else
+		--print("Sending Full Proj " .. Proj.Type)
 		this.SendFullProj(Index, Proj)
 	end
 

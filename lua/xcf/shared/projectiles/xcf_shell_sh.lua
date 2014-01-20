@@ -51,6 +51,9 @@ function this.GetCompact(bullet)
 		["Tracer"]		= (bullet.Tracer and bullet.Tracer > 0) and bullet.Tracer or nil,
 		["Colour"]		= bullet.Colour or nil,
 		
+		["Flechettes"]      = bullet.Flechettes,
+		["FlechetteSpread"] = bullet.FlechetteSpread,
+		
 		["Pos"]			= bullet.Pos,
 		["Flight"]		= bullet.Flight,
 		
@@ -81,8 +84,8 @@ function this.GetExpanded(bullet)
 	toconvert["Type"] = 		bullet["Type"] or "AP"
 	toconvert["PropLength"] = 	bullet["PropLength"] or 0
 	toconvert["ProjLength"] = 	bullet["ProjLength"] or 0
-	toconvert["Data5"] = 		bullet["FillerVol"] or bullet["Data5"] or 0
-	toconvert["Data6"] = 		bullet["ConeAng"] or bullet["Data6"] or 0
+	toconvert["Data5"] = 		bullet["FillerVol"] or bullet["Flechettes"] or bullet["Data5"] or 0
+	toconvert["Data6"] = 		bullet["ConeAng"] or bullet["FlechetteSpread"] or bullet["Data6"] or 0
 	toconvert["Data7"] = 		bullet["Data7"] or 0
 	toconvert["Data8"] = 		bullet["Data8"] or 0
 	toconvert["Data9"] = 		bullet["Data9"] or 0

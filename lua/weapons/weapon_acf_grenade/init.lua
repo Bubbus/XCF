@@ -12,7 +12,6 @@ SWEP.AutoSwitchFrom		= false
 
 
 
-
 local MIN_DONK_DELAY = 0.2
 local MIN_DONK_VEL = 50
 function SWEP.grenadeDonk(nade)
@@ -75,7 +74,7 @@ function SWEP:FireBullet()
 	self.BulletData.ProjClass = XCF.ProjClasses.Bomb or error("Could not find the Bomb projectile type!")
 	
 	local flight = MuzzleVecFinal * self.BulletData["MuzzleVel"] * 39.37 + self.Owner:GetVelocity()
-	local throwmod = math.Clamp((self.PressedDuration or 2) / 2, 0.5, 1.5)
+	local throwmod = math.Clamp((self.PressedDuration or self.ChargeTime) / self.ChargeTime, 0.33, 1) * 1.5
 	self.BulletData["Flight"] = flight * throwmod
 	
 	local bomb = ents.Create("xcf_bomb")
@@ -106,7 +105,7 @@ function SWEP:FireBullet()
 	timer.Simple(self.Primary.Delay or 3, function()
 			local wep = owner:GetActiveWeapon()
 			wep:SendWeaponAnim(ACT_VM_DRAW)
-			if owner:GetAmmoCount( self.Primary.Ammo ) <= 0 and wep:GetClass() == "weapon_acf_grenade" then
+			if owner:GetAmmoCount( self.Primary.Ammo ) <= 0 and wep.GrenadeRemove then
 				self.Weapon:Remove()
 				owner:ConCommand("lastinv")
 			end

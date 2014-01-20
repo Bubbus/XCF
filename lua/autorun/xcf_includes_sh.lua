@@ -7,6 +7,8 @@ if not aaa_foldergen_wasloaded then include("autorun/aaa_foldergen.lua") end
 // Requires manual sorting.
 AddCSLuaFile("autorun/xcf_includes_sh.lua")
 
+AddCSLuaFile("autorun/client/drawarc.lua")
+include("autorun/client/drawarc.lua")
 
 AddCSLuaFile("autorun/printbyname.lua")
 include("autorun/printbyname.lua")

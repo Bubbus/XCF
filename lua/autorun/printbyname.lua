@@ -33,6 +33,9 @@ pairsByName = pairsByKeys
 
 
 function printByName(tbl)
+	if XCF.Debug then
+		Msg(debug.traceback())
+	end
 	for k, v in pairsByKeys(tbl) do
 		Msg(tostring(k), "\t", "\t", tostring(v), "\n")
 	end

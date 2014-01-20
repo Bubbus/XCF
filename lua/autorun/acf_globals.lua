@@ -72,6 +72,8 @@ CreateConVar('sbox_max_acf_ammo', 32)
 CreateConVar('sbox_max_acf_misc', 32)
 CreateConVar('acf_meshvalue', 1)
 
+CreateConVar('sbox_max_xcf_bomb', 12)
+
 AddCSLuaFile()
 AddCSLuaFile( "acf/client/cl_acfballistics.lua" )
 AddCSLuaFile( "acf/client/cl_acfmenu_gui.lua" )
@@ -104,12 +106,14 @@ elseif CLIENT then
 	killicon.Add( "acf_SA", "HUD/killicons/acf_SA", Color( 200, 200, 48, 255 ) )
 	killicon.Add( "acf_ammo", "HUD/killicons/acf_ammo", Color( 200, 200, 48, 255 ) )
 	
+	CreateConVar("acf_cl_particlemul", 1)
 end
 
 include("acf/shared/rounds/roundap.lua")
 include("acf/shared/rounds/roundaphe.lua")
 include("acf/shared/rounds/roundhe.lua")
 include("acf/shared/rounds/roundheat.lua")
+include("acf/shared/rounds/roundfl.lua")
 include("acf/shared/rounds/roundhp.lua")
 include("acf/shared/rounds/roundsmoke.lua")
 include("acf/shared/rounds/roundrefill.lua")

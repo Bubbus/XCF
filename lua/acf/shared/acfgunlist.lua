@@ -1015,7 +1015,7 @@ GunTable["40mmSL"] = SL40mm
 
 -- -- -- -- Rocket tubes -- -- -- --
 
-nonsmoke = {["SM"] = true}
+nonsmoke = {SM = true, FL = true}
 
 local rkdesc = "  Rockets give great firepower for light weight, but are less accurate."
 
@@ -1409,7 +1409,7 @@ GunTable[R1_40mm.id] = R1_40mm
 
 -- -- -- -- -- Bombs! -- -- -- -- --
 
-local nofunallowed = {["SM"] = true, ["HEAT"] = true}
+local nofunallowed = {SM = true, HEAT = true, FL = true}
 
 
 local bombdesc = "Bombs have huge power but are heavy and fail if dropped badly."

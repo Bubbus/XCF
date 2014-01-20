@@ -107,10 +107,12 @@ function ENT:Initialize()
 	self.EmptyMass = 0
 	self.Ammo = 0
 	
+	self.LastBombPop = CurTime()
+	
 	self.Master = {}
 	self.Sequence = 0
 	
-	self.Inputs = Wire_CreateInputs( self, { "Active", "Detonate" } ) --, "Fuse Length"
+	self.Inputs = Wire_CreateInputs( self, { "Active" } ) --, "Fuse Length"
 	self.Outputs = Wire_CreateOutputs( self, { "Munitions", "On Fire" } )
 		
 	self.NextThink = CurTime() +  1
@@ -121,6 +123,7 @@ function ENT:Initialize()
 	self.nextColCheck = CurTime() + 2
 	
 end
+
 
 function ENT:ACF_Activate( Recalc )
 	
@@ -344,8 +347,8 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 	self.RoundType = bdata.Type		--Type of round, IE AP, HE, HEAT ...
 	self.RoundPropellant = bdata.PropLength or 0--Lenght of propellant
 	self.RoundProjectile = bdata.ProjLength or 0--Lenght of the projectile
-	self.RoundData5 = ( bdata.FillerVol or bdata.Data5 or 0 )
-	self.RoundData6 = ( bdata.ConeAng or bdata.Data6 or 0 )
+	self.RoundData5 = ( bdata.FillerVol or bdata.Flechettes or bdata.Data5 or 0 )
+	self.RoundData6 = ( bdata.ConeAng or bdata.FlechetteSpread or bdata.Data6 or 0 )
 	self.RoundData7 = ( bdata.Data7 or 0 )
 	self.RoundData8 = ( bdata.Data8 or 0 )
 	self.RoundData9 = ( bdata.Data9 or 0 )
@@ -356,6 +359,7 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 	local Efficiency = 0.11 * ACF.AmmoMod			--This is the part of space that's actually useful, the rest is wasted on interround gaps, loading systems ..
 	self.Volume = math.floor(Size.x * Size.y * Size.z)*Efficiency
 	self.Capacity = math.floor(self.Volume*16.38/self.BulletData.RoundVolume)
+	self.Caliber = list.Get("ACFEnts").Guns[self.RoundId].caliber
 	
 	self:SetNetworkedString( "Ammo", self.Ammo )
 	self:SetNetworkedString( "WireName", self.RoundId .. " Ammo" )
@@ -369,37 +373,71 @@ function ENT:CreateAmmo(Id, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Dat
 	
 end
 
+
+
+local popdelay = 1
+
+function ENT:Use(activator, caller, useType, value)
+
+	local lastpop = self.LastBombPop
+	self.LastBombPop = CurTime()
+
+	if self.Ammo < 1 then return end
+	
+	if CurTime() < lastpop + popdelay then
+		return
+	end
+
+	if not activator:IsPlayer() then return end
+	
+	local cantool = hook.Call("CanTool", SANDBOX, activator, activator:GetEyeTrace(), "")
+	if cantool == false then return end
+	
+	local guntbl = ACF.Weapons.Guns[self.RoundId] or {round = {}}
+	local visModel = guntbl.round.rackmdl or guntbl.round.model or "models/munitions/round_100mm_shot.mdl"
+	
+	local bomb, msg = MakeXCF_Bomb(self.Owner, self:GetPos() + Vector(0, 0, 64), self:GetAngles(),
+					self.RoundId,
+					self.RoundId,
+					self.RoundType,
+					self.RoundPropellant,
+					self.RoundProjectile,
+					self.RoundData5, 
+					self.RoundData6, 
+					self.RoundData7,
+					self.RoundData8,
+					self.RoundData9,
+					self.RoundData10,
+					visModel)
+						
+	if not IsValid(bomb) then
+		if msg then
+			ACF_SendNotify( activator, false, msg )
+		end
+		
+		return
+	end
+				
+	self.Ammo = self.Ammo - 1
+				
+	bomb:EnableClientInfo(true)
+	self.LastBombPop = CurTime()
+end
+
+
 function ENT:AmmoMass() --Returns what the ammo mass would be if the crate was full
 	return math.floor( (self.BulletData.ProjMass + self.BulletData.PropMass) * self.Capacity * 2 )
 end
 
 function ENT:TriggerInput( iname, value )
 
-	if (iname == "Active") then
+	if iname == "Active" then
 		if value > 0 then
 			self.Load = true
 			self:FirstLoad()
 		else
 			self.Load = false
 		end
-	elseif (iname == "Detonate") and value ~= 0 then
-		if not self.ACF then
-			self:ACF_Activate( false )
-		end
-		local HitRes = ACF_PropDamage( self , ACF_Kinetic( 99999 , 50000 ) , 999 , 0 , self.Owner )
-		---[[
-		local CanDo = hook.Run("ACF_AmmoExplode", self, self.BulletData )
-		if CanDo == false then return end
-		self.Exploding = true
-		--if( Inflictor and Inflictor:IsValid() and Inflictor:IsPlayer() ) then
-			self.Inflictor = self.Owner
-		--end
-		if self.Ammo > 1 then
-			ACF_AmmoExplosion( self , self:GetPos() )
-		else
-			ACF_HEKill( self , VectorRand() )
-		end
-		--]]--
 	end
 
 end

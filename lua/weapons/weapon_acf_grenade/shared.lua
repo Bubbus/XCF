@@ -70,6 +70,10 @@ SWEP.Class = "MG"
 SWEP.FlashClass = "MG"
 SWEP.Launcher = false
 
+SWEP.GrenadeRemove		= true
+SWEP.HasChargeTimer		= true
+SWEP.ChargeTime = 3
+
 
 
 function SWEP:InitBulletData()

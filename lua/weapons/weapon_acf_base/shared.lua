@@ -172,7 +172,7 @@ function SWEP:Think()
 		//print(self.Owner:KeyDown(IN_SPEED), self.Owner:KeyDown(IN_RUN))
 		
 		local healthFract = self.Owner:Health() / 100
-		self.MaxStamina = math.Clamp(healthFract, 0, 1)
+		self.MaxStamina = math.Clamp(healthFract, 0.5, 1)
 		
 		if self.Owner:KeyDown(IN_SPEED) then
 			self.Owner.XCFStamina = math.Clamp(self.Owner.XCFStamina - self.StaminaDrain, 0, 1)

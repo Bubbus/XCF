@@ -19,7 +19,7 @@ function SWEP:BeforeFire()
 	if clip1 <= 10 then
 		self.BulletData["Tracer"] = 2.5
 		self.BulletData["Colour"] = LOW_AMMO_COL
-	elseif clip1 % 5 == 0 then
+	elseif clip1 % 3 == 0 then
 		self.BulletData["Tracer"] = 2.5
 		self.BulletData["Colour"] = nil
 	else

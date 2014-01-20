@@ -118,7 +118,9 @@ end
 
 function Round.endflight( Index, Bullet, HitPos, HitNormal )
 	
-	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal, Bullet.FillerMass, Bullet.ProjMass - Bullet.FillerMass, Bullet.Owner )
+	printByName(Bullet)
+	
+	ACF_HE( HitPos - Bullet.Flight:GetNormalized()*3 , HitNormal, Bullet.FillerMass, Bullet.ProjMass - Bullet.FillerMass, Bullet.Owner, Bullet.Entity )
 	ACF_RemoveBullet( Index )
 	
 end
@@ -178,7 +180,7 @@ end
 
 function Round.guicreate( Panel, Table )
 
-	acfmenupanel:AmmoSelect()
+	acfmenupanel:AmmoSelect( ACF.AmmoBlacklist.SM )
 
 	acfmenupanel:CPanelText("Desc", "")	--Description (Name, Desc)
 	acfmenupanel:CPanelText("LengthDisplay", "")	--Total round length (Name, Desc)

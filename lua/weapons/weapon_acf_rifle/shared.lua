@@ -77,28 +77,36 @@ SWEP.Launcher = false
 
 function SWEP:InitBulletData()
 
-	self.BulletData = {}
-	//*
-	self.BulletData["BoomPower"]			= 0.020998006340302
-	self.BulletData["Caliber"]			= 1.27
-	self.BulletData["DragCoef"]			= 0.0023268800946611
-	self.BulletData["FrAera"]			= 1.26677166
+	self.BulletData = {}	
+	
+	self.BulletData["Type"]			= "AP"
 	self.BulletData["Id"]			= "12.7mmMG"
+	self.BulletData["BoomPower"]			= 0.01770197352
+	self.BulletData["Caliber"]			= 1.45
+	self.BulletData["DragCoef"]			= 0.0036166365280289
+	self.BulletData["FrAera"]			= 1.6513035
 	self.BulletData["KETransfert"]			= 0.1
 	self.BulletData["LimitVel"]			= 800
-	self.BulletData["MuzzleVel"]			= 899.98757024143
-	self.BulletData["PenAera"]			= 1.2226258898987
-	self.BulletData["ProjLength"]			= 5.4400000572205
-	self.BulletData["ProjMass"]			= 0.054440779432794
-	self.BulletData["PropLength"]			= 10.359999656677
-	self.BulletData["PropMass"]			= 0.020998006340302
+	self.BulletData["MaxPen"]			= 12.541676305848
+	self.BulletData["MaxProjLength"]			= 12.8
+	self.BulletData["MaxPropLength"]			= 15.139554903142
+	self.BulletData["MaxTotalLength"]			= 19.5
+	self.BulletData["MinProjLength"]			= 2.175
+	self.BulletData["MinPropLength"]			= 0.01
+	self.BulletData["MuzzleVel"]			= 902.31769083282
+	self.BulletData["PenAera"]			= 1.5316264800639
+	self.BulletData["ProjLength"]			= 3.5
+	self.BulletData["ProjMass"]			= 0.045658541775
+	self.BulletData["ProjVolume"]			= 5.77956225
+	self.BulletData["PropLength"]			= 6.7
+	self.BulletData["PropMass"]			= 0.01770197352
 	self.BulletData["Ricochet"]			= 75
-	self.BulletData["RoundVolume"]			= 20.014991865574
+	self.BulletData["RoundVolume"]			= 16.8432957
 	self.BulletData["ShovePower"]			= 0.2
 	self.BulletData["Tracer"]			= 0
-	self.BulletData["Type"]			= "AP"
 	self.BulletData["InvalidateTraceback"]			= true
-
+	
+	
 	if SERVER then
 		self.BulletData.CallbackEndFlight = self.CallbackEndFlight
 	end

@@ -6,25 +6,25 @@ function EFFECT:Init( data )
 	self.CreateTime = SysTime()
 	self.LastThink = self.CreateTime
 	
-	self:SetModel("models/munitions/round_100mm_shot.mdl") 
+	self:SetModel("models/props_junk/gascan001a.mdl") 
 	
 end
 
 
 
+local default = {model = "models/munitions/round_100mm_shot.mdl"}
 function EFFECT:Config(Bullet)
 
 	self.Bullet = Bullet
-	/*
-	print("\n\n\nBULLET EFFECT DATA:\n")
-	printByName(Bullet)
-	print("Tracer in:", tostring(Bullet.Tracer))
-	//*/
+	
+	local model = (ACF.RoundTypes[Bullet.Type] or default).model
+	--print(Bullet.Type, model)
+	self:SetModel(model) 
+	
 	if Bullet.Tracer and Bullet.Tracer != 0 then
 		Bullet.Tracer = ParticleEmitter( Bullet.Pos )
 		Bullet.Colour = Bullet.Colour or Color(255, 255, 255)
 	end
-	//print("Tracer out:", tostring(Bullet.Tracer), Bullet.Colour and (Bullet.Colour.r .. "," .. Bullet.Colour.g .. "," .. Bullet.Colour.b) or "no colour")
 		
 	Bullet.Effect = self.Entity
 		
@@ -146,10 +146,16 @@ function EFFECT:ApplyMovement( Bullet )
 	if Bullet.Tracer and Bullet.Tracer != 0 then
 		local DeltaTime = SysTime() - self.LastThink
 		local DeltaPos = Bullet.Flight*DeltaTime
+		
+		if DeltaPos:Length() > Bullet.Travelled then
+			DeltaPos = DeltaPos:GetNormalized() * Bullet.Travelled
+		end
+		
 		//print(DeltaPos:Length(), Bullet.Travelled)
-		local Length =  math.Clamp(DeltaPos:Length(), 1, Bullet.Travelled)
-		for i=1, 5 do
-			local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.Pos - (DeltaPos*i/5) )
+		local Length =  math.Clamp(DeltaPos:Length()*3, 1, Bullet.Travelled)
+		for i=1, 3 do
+			local Light = Bullet.Tracer:Add( "sprites/light_glow02_add.vmt", Bullet.Pos - (DeltaPos*i/3) )
+			--local Light = Bullet.Tracer:Add( "cable/rope.vmt", Bullet.Pos - (DeltaPos*i/5) )
 			if (Light) then		
 				Light:SetAngles( Bullet.Flight:Angle() )
 				Light:SetVelocity( Bullet.Flight:GetNormalized() )
@@ -160,9 +166,9 @@ function EFFECT:ApplyMovement( Bullet )
 				Light:SetStartSize( 5*Bullet.Caliber )
 				Light:SetEndSize( 1 )
 				Light:SetStartLength( Length )
-				Light:SetEndLength( 1 )
+				Light:SetEndLength( Length )
 			end
-			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), Bullet.Pos - (DeltaPos*i/5) )
+			local Smoke = Bullet.Tracer:Add( "particle/smokesprites_000"..math.random(1,9), Bullet.Pos - (DeltaPos*i/3) )
 			if (Smoke) then		
 				Smoke:SetAngles( Bullet.Flight:Angle() )
 				--Smoke:SetVelocity( Vector(0,0,0) )
@@ -170,7 +176,7 @@ function EFFECT:ApplyMovement( Bullet )
 				Smoke:SetDieTime( 1.2 )
 				Smoke:SetStartAlpha( 10 )
 				Smoke:SetEndAlpha( 0 )
-				Smoke:SetStartSize( 1 )
+				Smoke:SetStartSize( Length/800*Bullet.Caliber )
 				Smoke:SetEndSize( Length/400*Bullet.Caliber )
 				Smoke:SetRollDelta( 0.1 )
 				Smoke:SetAirResistance( 100 )

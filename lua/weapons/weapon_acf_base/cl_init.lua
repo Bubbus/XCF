@@ -140,10 +140,12 @@ function SWEP:DrawScope()
 	surface.DrawLine(scrw2 + centersep - devx, scrh2 - devy, scrw - devx, scrh2 - devy)
 	surface.DrawLine(scrw2 - devx, scrh - devy, scrw2 - devx, scrh2 + centersep - devy)
 	
-	local aimRadius = scrw / 2 * self.curVisInacc / self.Owner:GetFOV()
-	surface.DrawCircle(scrpos.x, scrpos.y, aimRadius, Color(50, 50, 50, 200) )
+	--local aimRadius = scrw / 2 * self.curVisInacc / self.Owner:GetFOV()
+	--surface.DrawCircle(scrpos.x, scrpos.y, aimRadius, Color(50, 50, 50, 200) )
+	--draw.Arc(scrpos.x, scrpos.y, aimRadius, -3, 0, 360, 2, Color(0, 0, 0, 255))
+	--draw.Arc(scrpos.x, scrpos.y, aimRadius, -1.5, 0, 360, 2, Color(255, 255, 255, 255))
 	
-	surface.DrawCircle(scrw2 - devx, scrh2 - devy, 2, Color(0,0,0))
+	--surface.DrawCircle(scrw2 - devx, scrh2 - devy, 2, Color(0,0,0))
 	
 	surface.SetDrawColor(0, 0, 0, 255) 
 	
@@ -263,11 +265,26 @@ surface.CreateFont( "XCFSWEPReload", {
 	outline = true
 } )
 
+
+
 function SWEP:DrawHUD()
+	-- moved to hook because arcs don't appear for a while if called here
+end
+
+
+
+
+hook.Add("HUDPaint", "ACFWep_HUD", function()
+
+	if not (LocalPlayer():Alive() or LocalPlayer():InVehicle()) then return end
+	local self = LocalPlayer():GetActiveWeapon()
+	if not self.IsACF then return end
+
+	--draw.Arc(200, 200, 50, 5, 0, 180, 5, Color(255, 255, 0, 255))
 
 	if not (self.Owner:Alive() or self.Owner:InVehicle()) then return end
 
-	local drawcircle = not self:DrawScope()
+	local drawcircle = true--not self:DrawScope()
 	
 	local scrpos = drawcircle and self.Owner:GetEyeTrace().HitPos:ToScreen()
 	local isReloading = self.Weapon:GetNetworkedBool( "reloading", false )
@@ -286,12 +303,13 @@ function SWEP:DrawHUD()
 	self.curVisInacc = math.Clamp(self.curVisInacc + self.smoothFactor, math.min(self.lastServInacc, self.curServInacc), math.max(self.lastServInacc, self.curServInacc))
 
 	local aimRadius = drawcircle and ScrW() / 2 * self.curVisInacc / self.Owner:GetFOV()
+	local fractLeft = 1
 	
-	if drawcircle then
-		local circlehue = servstam * 120
-		surface.DrawCircle(scrpos.x, scrpos.y, aimRadius, HSVToColor( circlehue, 1, isReloading and 0 or 1 ) )
+	if self.PressedTime then
+		local duration = CurTime() - self.PressedTime
+		fractLeft = math.Clamp(duration, 0, self.ChargeTime) / self.ChargeTime
 	end
-		
+	
 	if isReloading then
 		if not self.wasReloading then
 			self.reloadBegin = CurTime()
@@ -299,25 +317,40 @@ function SWEP:DrawHUD()
 		end
 		
 		if drawcircle then
-			local fractLeft = math.Clamp(self.lastReloadTime - (CurTime() - self.reloadBegin), 0, self.lastReloadTime) / self.lastReloadTime
+			fractLeft = math.Clamp(self.lastReloadTime - (CurTime() - self.reloadBegin), 0, self.lastReloadTime) / self.lastReloadTime
+			/*
 			local fontcol = HSVToColor( 120 - fractLeft * 120, 1, 1 )
 			surface.SetFont( "XCFSWEPReload" )
 			surface.SetTextColor( fontcol.r, fontcol.g, fontcol.b, 255 )
 			surface.SetTextPos( scrpos.x - aimRadius - 4, scrpos.y + aimRadius - 14 ) 
 			surface.DrawText( math.Round(100 - fractLeft * 100, 0) .. "%" )
+			//*/
 		end
 	end
 	self.wasReloading = isReloading
+
 	
-	if drawcircle and self.ShotSpread and self.ShotSpread > 0 then
-		surface.DrawCircle(scrpos.x, scrpos.y, ScrW() / 2 * (self.curVisInacc + self.ShotSpread) / self.Owner:GetFOV() , Color(0, 0, 0, 128) )
+	
+	if drawcircle then
+		local circlehue = Color(255, servstam*255, servstam*255, 255)
+
+		if self.ShotSpread and self.ShotSpread > 0 then
+			surface.DrawCircle(scrpos.x, scrpos.y, aimRadius , Color(0, 0, 0, 128) )
+			aimRadius = ScrW() / 2 * (self.curVisInacc + self.ShotSpread) / self.Owner:GetFOV()
+		end
+		draw.Arc(scrpos.x, scrpos.y, aimRadius, -3, (1-fractLeft)*360, 360, 5, Color(0, 0, 0, 255))
+		draw.Arc(scrpos.x, scrpos.y, aimRadius, -1.5, (1-fractLeft)*360, 360, 5, circlehue)
+		
 	end
+	
+	self:DrawScope()
 	
 	self.lastHUDDraw = CurTime()
 	
 	//SetupScopeChop(self)
+end)
 
-end
+
 
 
 /*
